@@ -1,0 +1,153 @@
+System Flow Overview
+
+This document explains how the database and workflow of the printing service platform operate. It is written in simple English to guide development and prevent mistakes in future updates.
+
+Overview
+
+This platform allows students to submit documents for printing, print staff to process those documents, and payments to be handled for both individual and class orders.
+It is built using the PERN stack with Prisma ORM.
+
+Database Flow (Simple Explanation)
+1. Students
+
+Each student has a unique registration number, personal details, class information, and a login password.
+
+Students submit documents and create print orders.
+
+Students can make payments for:
+
+Their own orders
+
+Class orders (any student in the class can pay)
+
+Note: Payment history is always kept. Deleting a student does not delete past payments.
+
+2. Print Staff
+
+Print staff are responsible for handling the printing workflow.
+
+Their responsibilities include:
+
+Viewing incoming orders
+
+Printing and updating order status
+
+Delivering completed orders
+
+Applying discounts (based on settings)
+
+Managing both class and individual orders
+
+3. Settings
+
+Printing settings define how the printing cost is calculated.
+
+Settings include:
+
+Price per page
+
+Discount toggle (enabled or disabled)
+
+Discount value when enabled
+
+Relationship to specific print staff
+
+4. Individual Orders
+
+Individual orders are created when a student submits a document.
+
+Each order includes:
+
+The student who placed it
+
+The print staff handling it
+
+Paper type (Black/White or Color)
+
+Number of copies
+
+Price and settings applied
+
+Timestamps
+
+After printing, the print staff update the order status and the student can make payment.
+
+5. Class Orders
+
+Class orders are printing requests meant for an entire class.
+
+Key rules:
+
+Only one payment can be made per class order
+
+Any student from that class can pay
+
+Includes:
+
+Assigned print staff
+
+Paper type
+
+Copies
+
+File to be printed
+
+Status updates
+
+This ensures that one student pays on behalf of the entire class.
+
+6. Payments
+
+Payments store the financial transaction details for both individual and class orders.
+
+Each payment includes:
+
+Amount
+
+Payment method (cash or mobile)
+
+Payment status
+
+The student who paid
+
+The related order
+
+Timestamps
+
+Note: Payment history is never deleted, even if a student account is removed.
+
+7. Documents
+
+Documents are uploaded by students when creating orders.
+
+Documents are linked to:
+
+Individual orders
+
+Class orders
+
+If an order is deleted, its documents are automatically deleted due to cascade rules.
+
+Document information includes:
+
+File name
+
+File URL
+
+File size
+
+Upload timestamp
+
+8. Timestamps
+
+Most database models include the following:
+
+createdAt — when the record was created
+
+updatedAt — when the record was last modified
+
+These help trace activity and simplify debugging.
+
+Summary
+
+Students upload documents → orders are created → print staff process those orders → payments are recorded → class orders allow one student to pay for the entire class → pricing and discount rules are controlled through settings.

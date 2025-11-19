@@ -1,7 +1,8 @@
 backend/.env
 backend/node_modules
+backend/.gitignore
 
 frontend/.env
 frontend/node_modules
 frontend/dist
-frontend/assets
+frontend/src/assets

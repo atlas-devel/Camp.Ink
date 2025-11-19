@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  Student
+  Printer
+}
+
+enum Program {
+  IT
+  CS
+  MTM
+}
+
+enum Study_year {
+  y1
+  y2
+  y3
+}
+
+enum Paper_type {
+  BW
+  Color
+}
+
+enum Status {
+  Pending
+  Printing
+  Delivered
+}
+
+enum Payment_methods {
+  Cash
+  Mobile
+}
+
+enum Payment_status {
+  Pending
+  Paid
+  Failed
+}
+
+model Student {
+  reg_number   String     @id
+  name         String
+  email        String     @unique
+  phone        String     @unique
+  password     String
+  role         Role
+  program      Program
+  study_year   Study_year
+  class_number String?
+  otp          String
+  otp_expiry   Int
+  is_verified  Boolean    @default(false)
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  orders       Orders[]
+  payments     Payments[]
+}
+
+model Print_stuff {
+  id          Int            @id @default(autoincrement())
+  name        String
+  phone       String         @unique
+  password    String
+  role        Role
+  createdAt   DateTime       @default(now())
+  updateAt    DateTime       @updatedAt
+  settings    Settings[]
+  orders      Orders[]
+  classOrders Class_orders[]
+}
+
+model Settings {
+  id               Int         @id @default(autoincrement())
+  name             String
+  price            Int
+  discount_enabled Boolean     @default(false)
+  discount_price   Int         @default(0)
+  print_id         Int
+  print_guy        Print_stuff @relation(fields: [print_id], references: [id], onDelete: Cascade)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+model Orders {
+  id         Int         @id @default(autoincrement())
+  student_id String
+  student    Student     @relation(fields: [student_id], references: [reg_number])
+  print_id   Int
+  print_guy  Print_stuff @relation(fields: [print_id], references: [id], onDelete: Cascade)
+  paper_type Paper_type  @default(BW)
+  prince     Int
+  copies     Int         @default(1)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  payments   Payments[]
+}
+
+model Class_orders {
+  id         Int         @id @default(autoincrement())
+  print_id   Int
+  print_guy  Print_stuff @relation(fields: [print_id], references: [id], onDelete: Cascade)
+  file       String
+  paper_type Paper_type  @default(BW)
+  copies     Int         @default(1)
+  status     Status      @default(Pending)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  payments   Payments[]
+}
+
+model Payments {
+  id             Int             @id @default(autoincrement())
+  order_id       Int
+  order          Orders          @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  user_id        String
+  user           Student         @relation(fields: [user_id], references: [reg_number])
+  method         Payment_methods
+  class_order_id Int?
+  class_order    Class_orders?   @relation(fields: [class_order_id], references: [id])
+  amount         Int
+  status         Payment_status
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
