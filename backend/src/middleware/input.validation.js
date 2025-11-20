@@ -1,5 +1,4 @@
 const validateInput = (req, res, next) => {
-  console.log(req.body);
   const {
     reg_number,
     phone,
@@ -35,7 +34,6 @@ const validateInput = (req, res, next) => {
     program,
     study_year,
   };
-  console.log(req.validatedInputData);
   next();
 };
 
