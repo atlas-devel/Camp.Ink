@@ -64,7 +64,7 @@ model Student {
   study_year   Study_year
   class_number String?
   otp          String
-  otp_expiry   Int
+  otp_expiry   DateTime
   is_verified  Boolean    @default(false)
   created_at   DateTime   @default(now())
   updated_at   DateTime   @updatedAt
