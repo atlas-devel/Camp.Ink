@@ -24,13 +24,15 @@ export const studentRegister = async (req, res) => {
     },
   });
   if (existingStudent) {
-    throw new Error(
-      "Student with this email or registration number already exists"
-    );
+    return res.status(500).json({
+      success: false,
+      message: "Student with this email or registration number already exists",
+    });
   }
-  console.log("test____");
   const OTP = generateOTP();
-  const otp_expiration_time = BigInt(Date.now() + 60 * 60 * 1000);
+  const otp_expiration_time = new Date(
+    Date.now() + 60 * 60 * 1000
+  ).toISOString();
 
   const otp_verification_options = {
     from: ENV.OWNER_EMAIL,
@@ -55,7 +57,7 @@ export const studentRegister = async (req, res) => {
     study_year,
   };
   try {
-    await transporter.sendMail(otp_verification_options);
+    // await transporter.sendMail(otp_verification_options);
     const createStudent = await prisma.student.create({
       data: newStudent,
     });
@@ -64,13 +66,16 @@ export const studentRegister = async (req, res) => {
       data: createStudent,
     });
   } catch (error) {
+    console.log("Error at student registration: " + error.message);
     return res.status(500).json({
       success: false,
-      message: "Error sending email or creating student",
-      error: error.message,
+      message: "Error at student registration",
+      error: "Error at student registration: " + error.message,
     });
   }
 };
+
+// otp Verification controller
 
 export const verifyOTP = async (req, res) => {
   const { student_id } = req.params;
@@ -96,7 +101,7 @@ export const verifyOTP = async (req, res) => {
         message: "Invalid OTP",
       });
     }
-    if (existingStudent.otp_expiry < Date.now()) {
+    if (existingStudent.otp_expiry < new Date()) {
       return res.status(400).json({
         success: false,
         message: "OTP has expired",
@@ -104,6 +109,7 @@ export const verifyOTP = async (req, res) => {
     }
 
     // updating student verification status
+
     const verifyStudent = await prisma.student.update({
       where: {
         reg_number: student_id,
