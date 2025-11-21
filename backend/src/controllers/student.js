@@ -57,7 +57,7 @@ export const studentRegister = async (req, res) => {
     study_year,
   };
   try {
-    // await transporter.sendMail(otp_verification_options);
+    await transporter.sendMail(otp_verification_options);
     const createStudent = await prisma.student.create({
       data: newStudent,
     });
